@@ -6,8 +6,9 @@ import cors from 'cors';
 import bodyParser from "body-parser";
 
 
-import mongoose from "mongoose";
+import mongoose,{ConnectOptions} from "mongoose";
 
+//const {MONGODB_URI} = process.env;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -21,12 +22,20 @@ app.use(bodyParser.json());
 
 const server = http.createServer(app)
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+/*
+const connectOptions: ConnectOptions = {};
 
-const MONGO_URL = process.env.MONGO_URL;
-
-mongoose.connect(MONGO_URL);
+mongoose.connect(MONGODB_URI!, connectOptions)
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err: Error) => {
+    console.error('Failed to connect to MongoDB', err);
+  });
+*/
+mongoose.connect(process.env.MONGODB_URI)
 mongoose.connection.on("error",(error:Error)=>console.log(error))
 
