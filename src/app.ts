@@ -1,50 +1,32 @@
-import express, { Application, Request, Response } from "express";
-import mongoose from "mongoose";
+import express from 'express';
+import http from 'http';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import cors from 'cors';
 import bodyParser from "body-parser";
 
-const app: Application = express();
-const PORT = 3000;
 
-// MongoDB setup
-mongoose.connect(
-  "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.9.0",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+import mongoose from "mongoose";
 
-// Create a simple user schema
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-});
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-const User = mongoose.model("User", userSchema);
+app.use(cors({
+  credentials: true,
+}));
+app.use(compression())
 
+app.use(cookieParser())
 app.use(bodyParser.json());
 
-// Create a user
-app.post("/users", async (req: Request, res: Response) => {
-  try {
-    const user = new User(req.body);
-    await user.save();
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(500).json({ error: "Error creating user" });
-  }
-});
-
-// Get all users
-app.get("/users", async (req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Error getting users" });
-  }
-});
+const server = http.createServer(app)
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
+
+const MONGO_URL = process.env.MONGO_URL;
+
+mongoose.connect(MONGO_URL);
+mongoose.connection.on("error",(error:Error)=>console.log(error))
+
